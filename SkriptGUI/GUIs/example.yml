@@ -1,14 +1,14 @@
 gui-size: 1
-gui-name: '&6sa'
+gui-name: &6hi
 gui-slots:
   1:
     item: diamond
     slot: 0
     item-name: hi
-    close-on-click: false
+    close-on-click: true
     lores:
     - '%server_online%'
     console-commands:
     - 'hello'
     player-commands:
-    - 'hello'
+    - 'deneme'
