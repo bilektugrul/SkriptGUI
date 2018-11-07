@@ -1,8 +1,37 @@
+import:
+	java.io.BufferedReader
+	java.io.InputStreamReader
+	java.net.URL
+	java.lang.System
+expression text get of url %text%:
+	return type: strings
+	get:
+		set {_in} to new BufferedReader(new InputStreamReader(new URL(expression 1).openStream()))
+		while 1 is 1:
+			add 1 to {_count}
+			set {_return::%{_count}%} to {_in}.readLine()
+			if {_return::%{_count}%} isn't set:
+				stop loop
+		{_in}.close()
+		return {_return::*}
 on load:
+	if file "plugins/SkriptGUI/" doesn't exist:
+		set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
+		create dir "plugins/SkriptGUI/GUIs/" 
+		set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
+		set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
+		set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
 	load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
-	load yaml "plugins/SkriptGUI/GUIs/example.yml" as "SkriptGUI/GUIs/example.yml"
 	loop files in directory "plugins/SkriptGUI/GUIs":
 		load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
+	loop loaded yaml:
+		if loop-value contains "SkriptGUI/GUIs/":
+			set {_value::*} to split loop-value at "s/"
+			loop {_value::*}:
+				if loop-value-2 contains ".yml":
+					if file "plugins/SkriptGUI/GUIs/%loop-value-2%" doesn't exist:
+						unload yaml "SkriptGUI/GUIs/%loop-value-2%"
+			
 on command:
 	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
 		cancel event
@@ -17,8 +46,8 @@ function openGUI(player: player, gui: text):
 		set {_slot} to yaml value "gui-slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_itemName} to yaml value "gui-slots.%loop-value%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_itemLore::*} to colored join yaml list "gui-slots.%loop-value%.lores" from "SkriptGUI/GUIs/%{_gui}%.yml" with "||"
-		set {_commands::*} to join yaml list "gui-slots.%loop-value%.commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		replace "%%player%%" with "%{_player}%" in {_commands::*} and {_itemLore::*}
+		set {_consoleCommands::*} to join yaml list "gui-slots.%loop-value%.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_playerCommands::*} to join yaml list "gui-slots.%loop-value%.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		loop {_itemLore::*}:
 			if loop-value-2 contains "%%":
 				set {_placeholder::*} to split loop-value-2 at " "
@@ -31,6 +60,9 @@ function openGUI(player: player, gui: text):
 								set {_placeholder} to placeholder "%{_placeholder}%" from {_player}
 								replace "%%%{_placeholder::2}%%%" with "%{_placeholder}%" in {_itemLore::*}
 		make gui slot "%{_slot}%" parsed as integer of {_player} with "%{_item}%" parsed as item with no nbt named colored {_itemName} with lore "%{_itemLore::*}%" to run:
-			close {_player}'s inventory
-			loop {_commands::*}:
+			if yaml value "gui-slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
+				close {_player}'s inventory
+			loop {_consoleCommands::*}:
 				execute console command loop-value-2
+			loop {_playerCommands::*}:
+				execute {_player} command loop-value-2
