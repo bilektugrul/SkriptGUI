@@ -6,7 +6,6 @@ gui-slots:
     slot: 0
     item-name: 'sa'
     lores:
-    - 'selam %player%'
-    - '%papi-player_name%'
+    - '%server_online%'
     commands:
     - 'selam'
