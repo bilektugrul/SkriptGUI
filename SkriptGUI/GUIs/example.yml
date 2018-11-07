@@ -1,5 +1,5 @@
 gui-size: 1
-gui-name: &6hi
+gui-name: '&6hi'
 gui-slots:
   1:
     item: diamond
