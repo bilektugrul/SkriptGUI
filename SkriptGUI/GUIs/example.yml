@@ -4,8 +4,11 @@ gui-slots:
   1:
     item: diamond
     slot: 0
-    item-name: 'sa'
+    item-name: hi
+    close-on-click: false
     lores:
     - '%server_online%'
-    commands:
-    - 'selam'
+    console-commands:
+    - 'hello'
+    player-commands:
+    - 'hello'
