@@ -1,0 +1,36 @@
+on load:
+	load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
+	load yaml "plugins/SkriptGUI/GUIs/example.yml" as "SkriptGUI/GUIs/example.yml"
+	loop files in directory "plugins/SkriptGUI/GUIs":
+		load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
+on command:
+	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
+		cancel event
+		openGUI(player, yaml value "gui-commands./%full command%" from "SkriptGUI/config")
+function openGUI(player: player, gui: text):
+	set {_size} to yaml value "gui-size" from "SkriptGUI/GUIs/%{_gui}%.yml"
+	set {_name} to yaml value "gui-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
+	open virtual chest inventory with {_size} rows named {_name} to {_player}
+	loop yaml node keys "gui-slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
+		set {_value} to loop-value
+		set {_item} to yaml value "gui-slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_slot} to yaml value "gui-slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_itemName} to yaml value "gui-slots.%loop-value%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_itemLore::*} to colored join yaml list "gui-slots.%loop-value%.lores" from "SkriptGUI/GUIs/%{_gui}%.yml" with "||"
+		set {_commands::*} to join yaml list "gui-slots.%loop-value%.commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		replace "%%player%%" with "%{_player}%" in {_commands::*} and {_itemLore::*}
+		loop {_itemLore::*}:
+			if loop-value-2 contains "%%":
+				set {_placeholder::*} to split loop-value-2 at " "
+				loop {_placeholder::*}:
+					if first 1 character of loop-value-3 is "%%":
+						if last 1 character of loop-value-3 is "%%":
+							if loop-value-3 isn't "%%%%":
+								set {_placeholder::*} to split loop-value-3 at "%%"
+								set {_placeholder} to {_placeholder::2}
+								set {_placeholder} to placeholder "%{_placeholder}%" from {_player}
+								replace "%%%{_placeholder::2}%%%" with "%{_placeholder}%" in {_itemLore::*}
+		make gui slot "%{_slot}%" parsed as integer of {_player} with "%{_item}%" parsed as item with no nbt named colored {_itemName} with lore "%{_itemLore::*}%" to run:
+			close {_player}'s inventory
+			loop {_commands::*}:
+				execute console command loop-value-2
