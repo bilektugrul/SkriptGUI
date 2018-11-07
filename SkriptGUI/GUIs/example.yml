@@ -9,6 +9,6 @@ gui-slots:
     lores:
     - '%server_online%'
     console-commands:
-    - 'hello'
+    - 'say hi'
     player-commands:
-    - 'deneme'
+    - 'example'
