@@ -1,3 +1,5 @@
 prefix: '&8[&3SkriptGUI&8]'
+admin-permission: 'skgui.admin'
+no-permission-message: '&8[&3SkriptGUI&8] &cYou don''t have the required permission for this command.'
 gui-commands:
   '/example': example
