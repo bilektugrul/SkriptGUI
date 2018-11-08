@@ -1,5 +1,5 @@
 #Version:
-#0.2
+#0.3
 #Don't change this lines!
 import:
 	java.io.BufferedReader
@@ -23,59 +23,75 @@ on command:
 	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
 		cancel event
 		openGUI(player, yaml value "gui-commands./%full command%" from "SkriptGUI/config")
-command /skgui [<text>]:
-	permission: skgui.admin
-	permission message: &4You don't do it.
+command /skgui [<text>] [<text>] [<player=%player%>]:
 	trigger:
-		if arg-1 is "reload":
-			if file "plugins/SkriptGUI/" doesn't exist:
-				set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
-				create dir "plugins/SkriptGUI/GUIs/" 
-				set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
-				set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
-				set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
-			load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
-			set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
-			set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
-			if line 2 in file "plugins/Skript/scripts/%script's name%.sk" isn't {_lines::2}:
-				send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
-			loop files in directory "plugins/SkriptGUI/GUIs":
-				load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
-			loop loaded yaml:
-				if loop-value contains "SkriptGUI/GUIs/":
-					set {_value::*} to split loop-value at "s/"
-					loop {_value::*}:
-						if loop-value-2 contains ".yml":
-							if file "plugins/SkriptGUI/GUIs/%loop-value-2%" doesn't exist:
-								unload yaml "SkriptGUI/GUIs/%loop-value-2%"
-			send "%{SkriptGUI::prefix}% &2Succesfully reloaded." to executor
+		if executor has permission {SkriptGUI::adminPerm}:
+			if arg-1 is "reload" or "rl":
+				set {_systemMS} to current system milliseconds
+				if file "plugins/SkriptGUI/" doesn't exist:
+					set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
+					create dir "plugins/SkriptGUI/GUIs/" 
+					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
+					set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
+					set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
+				load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
+				set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
+				set {SkriptGUI::noPermMSG} to yaml value "no-permission-message" from "SkriptGUI/config"
+				set {SkriptGUI::adminPerm} to yaml value "admin-permission" from "SkriptGUI/config"
+				set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
+				if line 2 in file "plugins/Skript/scripts/%script's name%.sk" isn't {_lines::2}:
+					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
+				loop files in directory "plugins/SkriptGUI/GUIs":
+					load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
+				loop loaded yaml:
+					if loop-value contains "SkriptGUI/GUIs/":
+						set {_value::*} to split loop-value at "s/"
+						loop {_value::*}:
+							if loop-value-2 contains ".yml":
+								if file "plugins/SkriptGUI/GUIs/%loop-value-2%" doesn't exist:
+									unload yaml "SkriptGUI/GUIs/%loop-value-2%"
+				send "%{SkriptGUI::prefix}% &2Succesfully reloaded. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)" to executor
+			else if arg-1 is "open":
+				if yaml "SkriptGUI/GUIs/%arg-2%.yml" is loaded:
+					openGUI(arg-3, arg-2)
+				else:
+					send "%{SkriptGUI::prefix}% &cThere is no GUI with this name."
+			else:
+				send "%{SkriptGUI::prefix}% &c/skgui &8[&ereload, open <gui>&8]"
+		else:
+			send {SkriptGUI::noPermMSG}
 function openGUI(player: player, gui: text):
-	set {_size} to yaml value "gui-size" from "SkriptGUI/GUIs/%{_gui}%.yml"
-	set {_name} to yaml value "gui-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
-	open virtual chest inventory with {_size} rows named {_name} to {_player}
-	loop yaml node keys "gui-slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
-		set {_value} to loop-value
-		set {_item} to yaml value "gui-slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_slot} to yaml value "gui-slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_itemName} to yaml value "gui-slots.%loop-value%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_itemLore::*} to colored join yaml list "gui-slots.%loop-value%.lores" from "SkriptGUI/GUIs/%{_gui}%.yml" with "||"
-		set {_consoleCommands::*} to join yaml list "gui-slots.%loop-value%.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_playerCommands::*} to join yaml list "gui-slots.%loop-value%.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		loop {_itemLore::*}:
-			if loop-value-2 contains "%%":
-				set {_placeholder::*} to split loop-value-2 at " "
-				loop {_placeholder::*}:
-					if first 1 character of loop-value-3 is "%%":
-						if last 1 character of loop-value-3 is "%%":
-							if loop-value-3 isn't "%%%%":
-								set {_placeholder::*} to split loop-value-3 at "%%"
-								set {_placeholder} to {_placeholder::2}
-								set {_placeholder} to placeholder "%{_placeholder}%" from {_player}
-								replace "%%%{_placeholder::2}%%%" with "%{_placeholder}%" in {_itemLore::*}
-		make gui slot "%{_slot}%" parsed as integer of {_player} with "%{_item}%" parsed as item with no nbt named colored {_itemName} with lore "%{_itemLore::*}%" to run:
-			if yaml value "gui-slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-				close {_player}'s inventory
-			loop {_consoleCommands::*}:
-				execute console command loop-value-2
-			loop {_playerCommands::*}:
-				execute {_player} command loop-value-2
+	if {_player} has permission yaml value "gui-permission" from "SkriptGUI/GUIs/%{_gui}%.yml":
+		set {_size} to yaml value "gui-size" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_name} to yaml value "gui-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		open virtual chest inventory with {_size} rows named {_name} to {_player}
+		loop yaml node keys "gui-slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
+			set {_value} to loop-value
+			set {_item} to yaml value "gui-slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml"
+			set {_slot} to yaml value "gui-slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
+			set {_itemName} to yaml value "gui-slots.%loop-value%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
+			set {_itemLore::*} to colored join yaml list "gui-slots.%loop-value%.lores" from "SkriptGUI/GUIs/%{_gui}%.yml" with "||"
+			set {_consoleCommands::*} to join yaml list "gui-slots.%loop-value%.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
+			set {_playerCommands::*} to join yaml list "gui-slots.%loop-value%.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml"
+			loop {_itemLore::*}:
+				if loop-value-2 contains "%%":
+					set {_placeholder::*} to split loop-value-2 at " "
+					loop {_placeholder::*}:
+						if first 1 character of loop-value-3 is "%%":
+							if last 1 character of loop-value-3 is "%%":
+								if loop-value-3 isn't "%%%%":
+									set {_placeholder::*} to split loop-value-3 at "%%"
+									set {_placeholder} to {_placeholder::2}
+									set {_placeholder} to placeholder "%{_placeholder}%" from {_player}
+									replace "%%%{_placeholder::2}%%%" with "%{_placeholder}%" in {_itemLore::*}, {_consoleCommands::*} and {_playerCommands::*}
+			make gui slot "%{_slot}%" parsed as integer of {_player} with "%{_item}%" parsed as item with no nbt named colored {_itemName} with lore "%{_itemLore::*}%" to run:
+				if yaml value "gui-slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
+					close {_player}'s inventory
+				loop {_consoleCommands::*}:
+					execute console command loop-value-2
+				loop {_playerCommands::*}:
+					execute {_player} command loop-value-2
+	else:
+		set {_noPermMSG} to colored yaml value "no-permission-message" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_noPermMSG}
+		send {_noPermMSG} to {_player}
