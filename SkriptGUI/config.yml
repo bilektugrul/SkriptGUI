@@ -1,2 +1,3 @@
+prefix: '&8[&3SkriptGUI&8]'
 gui-commands:
   '/example': example
