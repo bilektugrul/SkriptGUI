@@ -1,3 +1,5 @@
+gui-permission: 'skgui.example'
+no-permission-message: '%prefix% &cYou don''t have the required permission for this GUI.'
 gui-size: 1
 gui-name: '&6hi'
 gui-slots:
@@ -7,7 +9,7 @@ gui-slots:
     item-name: hi
     close-on-click: true
     lores:
-    - '%server_online%'
+    - '%player_name%'
     console-commands:
     - 'say hi'
     player-commands:
