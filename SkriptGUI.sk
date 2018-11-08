@@ -1,3 +1,6 @@
+#Version:
+#0.2
+#Don't change this lines!
 import:
 	java.io.BufferedReader
 	java.io.InputStreamReader
@@ -15,27 +18,37 @@ expression text get of url %text%:
 		{_in}.close()
 		return {_return::*}
 on load:
-	if file "plugins/SkriptGUI/" doesn't exist:
-		set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
-		create dir "plugins/SkriptGUI/GUIs/" 
-		set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
-		set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
-		set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
-	load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
-	loop files in directory "plugins/SkriptGUI/GUIs":
-		load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
-	loop loaded yaml:
-		if loop-value contains "SkriptGUI/GUIs/":
-			set {_value::*} to split loop-value at "s/"
-			loop {_value::*}:
-				if loop-value-2 contains ".yml":
-					if file "plugins/SkriptGUI/GUIs/%loop-value-2%" doesn't exist:
-						unload yaml "SkriptGUI/GUIs/%loop-value-2%"
-			
+	execute console command "skgui reload"
 on command:
 	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
 		cancel event
 		openGUI(player, yaml value "gui-commands./%full command%" from "SkriptGUI/config")
+command /skgui [<text>]:
+	permission: skgui.admin
+	permission message: &4You don't do it.
+	trigger:
+		if arg-1 is "reload":
+			if file "plugins/SkriptGUI/" doesn't exist:
+				set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
+				create dir "plugins/SkriptGUI/GUIs/" 
+				set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
+				set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
+				set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
+			load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
+			set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
+			set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
+			if line 2 in file "plugins/Skript/scripts/%script's name%.sk" isn't {_lines::2}:
+				send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
+			loop files in directory "plugins/SkriptGUI/GUIs":
+				load yaml "plugins/SkriptGUI/GUIs/%name of file loop-value%.yml" as "SkriptGUI/GUIs/%name of file loop-value%.yml"
+			loop loaded yaml:
+				if loop-value contains "SkriptGUI/GUIs/":
+					set {_value::*} to split loop-value at "s/"
+					loop {_value::*}:
+						if loop-value-2 contains ".yml":
+							if file "plugins/SkriptGUI/GUIs/%loop-value-2%" doesn't exist:
+								unload yaml "SkriptGUI/GUIs/%loop-value-2%"
+			send "%{SkriptGUI::prefix}% &2Succesfully reloaded." to executor
 function openGUI(player: player, gui: text):
 	set {_size} to yaml value "gui-size" from "SkriptGUI/GUIs/%{_gui}%.yml"
 	set {_name} to yaml value "gui-name" from "SkriptGUI/GUIs/%{_gui}%.yml"
