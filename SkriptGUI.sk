@@ -29,11 +29,9 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 			if arg-1 is "reload" or "rl":
 				set {_systemMS} to current system milliseconds
 				if file "plugins/SkriptGUI/" doesn't exist:
-					set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
 					create dir "plugins/SkriptGUI/GUIs/" 
-					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to {_lines::*}
-					set {_lines::*} to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"
-					set file contents of "plugins/SkriptGUI/config.yml" to {_lines::*}	
+					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
+					set file contents of "plugins/SkriptGUI/config.yml" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"	
 				load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
 				set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
 				set {SkriptGUI::noPermMSG} to yaml value "no-permission-message" from "SkriptGUI/config"
@@ -63,9 +61,8 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				if arg-2 is set:
 					if yaml "SkriptGUI/GUIs/%arg-2%.yml" isn't loaded:
 						set {_systemMS} to current system milliseconds
-						set {_lines::*} to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
 						create file "plugins/SkriptGUI/GUIs/%arg-2%.yml" 
-						set file contents of "plugins/SkriptGUI/GUIs/%arg-2%.yml" to {_lines::*}
+						set file contents of "plugins/SkriptGUI/GUIs/%arg-2%.yml" to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
 						load yaml "plugins/SkriptGUI/GUIs/%arg-2%.yml" as "SkriptGUI/GUIs/%arg-2%.yml"
 						send "%{SkriptGUI::prefix}% &2Succesfully created. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)"
 					else:
