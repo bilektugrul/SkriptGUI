@@ -1,29 +1,31 @@
-gui-permission: 'skgui.example'
-no-permission-message: '%prefix% &cYou don''t have the required permission for this GUI.'
-gui-size: 1
-gui-name: '&6hi'
-gui-slots:
-  1:
-    item: diamond
-    slot: 0
-    item-name: '&2hi %player_name%'
-    close-on-click: true
-    lores:
-    - '&6hello &a%player_name%'
-    - '&6your health: &a%player_health_rounded%'
-    console-commands:
-    - '!add 1 to balance of "%player_name%" parsed as player'
-    player-commands:
-    - 'tell %player_name% there are %server_online% players on this server.'
-  2:
-    item: diamond pickaxe
-    slot: 1
-    item-name: '&2hi'
-    close-on-click: true
-    lores:
-    - '&6hello &a%player_name%'
-    - '&6your health: &a%player_health_rounded%'
-    console-commands:
-    - '!add 1 to balance of "%player_name%" parsed as player'
-    player-commands:
-    - 'tell %player_name% there are %server_online% players on this server.'
+gui:
+    permission: skgui.example
+    no-permission-message: '%prefix% &cYou don''t have the required permission for
+        this GUI.'
+    size: 1
+    name: '&6hi'
+    slots:
+        'slot-1':
+            item: diamond
+            slot: 0
+            item-name: '&2hi %player_name%'
+            close-on-click: true
+            lore:
+            - '&6hello &a%player_name%'
+            - '&6your health: &a%player_health_rounded%'
+            console-commands:
+            - '!add 1 to balance of "%player_name%" parsed as player'
+            player-commands:
+            - tell %player_name% there are %server_online% players on this server.
+        'slot-2':
+            item: diamond pickaxe
+            slot: 1
+            item-name: '&2hi'
+            close-on-click: true
+            lore:
+            - '&6hello &a%player_name%'
+            - '&6your health: &a%player_health_rounded%'
+            console-commands:
+            - '!add 1 to balance of "%player_name%" parsed as player'
+            player-commands:
+            - tell %player_name% there are %server_online% players on this server.
