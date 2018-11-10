@@ -5,7 +5,7 @@ gui:
     size: 1
     name: '&6hi'
     slots:
-        'slot-1':
+        slot-1:
             item: diamond
             slot: 0
             item-name: '&2hi %player_name%'
@@ -17,7 +17,7 @@ gui:
             - '!add 1 to balance of "%player_name%" parsed as player'
             player-commands:
             - tell %player_name% there are %server_online% players on this server.
-        'slot-2':
+        slot-2:
             item: diamond pickaxe
             slot: 1
             item-name: '&2hi'
