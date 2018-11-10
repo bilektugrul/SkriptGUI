@@ -4,3 +4,7 @@ no-permission-message: '%prefix% &cYou don''t have the required permission for t
     command.'
 gui-commands:
     /example: example
+help-command:
+- '%prefix% &c/skgui &ereload'
+- '%prefix% &c/skgui &eopen <gui [<player>]'
+- '%prefix% &c/skgui &ecreate <gui>'
