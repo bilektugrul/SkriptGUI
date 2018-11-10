@@ -17,9 +17,9 @@ gui-slots:
     - 'tell %player_name% there are %server_online% players on this server.'
   2:
     item: diamond pickaxe
-    slot: 0
+    slot: 1
     item-name: '&2hi'
-    close-on-click: false
+    close-on-click: true
     lores:
     - '&6hello &a%player_name%'
     - '&6your health: &a%player_health_rounded%'
