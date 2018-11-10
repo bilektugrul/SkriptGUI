@@ -6,5 +6,5 @@ gui-commands:
     /example: example
 help-command:
 - '%prefix% &c/skgui &ereload'
-- '%prefix% &c/skgui &eopen <gui [<player>]'
+- '%prefix% &c/skgui &eopen <gui> [<player>]'
 - '%prefix% &c/skgui &ecreate <gui>'
