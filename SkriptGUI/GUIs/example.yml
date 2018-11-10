@@ -6,11 +6,24 @@ gui-slots:
   1:
     item: diamond
     slot: 0
-    item-name: hi
+    item-name: '&2hi %player_name%'
     close-on-click: true
     lores:
-    - '%player_name%'
+    - '&6hello &a%player_name%'
+    - '&6your health: &a%player_health_rounded%'
     console-commands:
-    - 'say hi'
+    - '!add 1 to balance of "%player_name%" parsed as player'
     player-commands:
-    - 'example'
+    - 'tell %player_name% there are %server_online% players on this server.'
+  2:
+    item: diamond pickaxe
+    slot: 0
+    item-name: '&2hi'
+    close-on-click: false
+    lores:
+    - '&6hello &a%player_name%'
+    - '&6your health: &a%player_health_rounded%'
+    console-commands:
+    - '!add 1 to balance of "%player_name%" parsed as player'
+    player-commands:
+    - 'tell %player_name% there are %server_online% players on this server.'
