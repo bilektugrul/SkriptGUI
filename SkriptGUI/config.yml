@@ -1,5 +1,6 @@
 prefix: '&8[&3SkriptGUI&8]'
-admin-permission: 'skgui.admin'
-no-permission-message: '%prefix% &cYou don''t have the required permission for this command.'
+admin-permission: skgui.admin
+no-permission-message: '%prefix% &cYou don''t have the required permission for this
+    command.'
 gui-commands:
-  '/example': example
+    /example: example
