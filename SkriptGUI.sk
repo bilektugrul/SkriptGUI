@@ -1,4 +1,4 @@
-#Version: 0.5.3
+#Version: 0.5.4
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -82,6 +82,7 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
 					set {_fileName} to line 1 in file "plugins/Skript/scripts/%script's name%.sk"
 					replace "##Version: " with "" in {_fileName}
+					create directory "plugins/SkriptGUI/backups"
 					set file contents of "plugins/SkriptGUI/backups/SkriptGUI (%{_fileName}%).sk" to file contents of "plugins/Skript/scripts/%script's name%.sk"
 					set file contents of "plugins/Skript/scripts/%script's name%.sk" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
 					execute executor command "sk reload %script's name%"
