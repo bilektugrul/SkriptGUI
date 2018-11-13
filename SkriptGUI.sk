@@ -1,4 +1,4 @@
-#Version: 0.5
+#Version: 0.5.1
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -11,6 +11,8 @@ expression text get of url %text% [line %-integer%]:
 		while true:
 			add 1 to {_count}
 			set {_return::%{_count}%} to {_in}.readLine()
+			{_return::%{_count}%} isn't set:
+				stop loop
 			if {_count} is expression-2:
 				{_in}.close()
 				return {_return::%{_count}%}
@@ -47,6 +49,7 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::helpCMD::*}
 				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
 					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
+					send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" to (executor if executor is a player, else null)
 				else:
 					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
 				loop files in directory "plugins/SkriptGUI/GUIs":
@@ -74,6 +77,13 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 						send "%{SkriptGUI::prefix}% &cYou can't create this GUI because there is already a GUI with this name."
 				else:
 					send "%{SkriptGUI::prefix}% &cPlease enter a GUI name."
+			else if arg-1 is "update":
+				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
+					set file contents of "plugins/Skript/scripts/%script's name%.sk" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
+					execute executor command "sk reload %script's name%"
+					send "%{SkriptGUI::prefix}% &2Succesfully updated and reloaded!"
+				else:
+					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
 			else:
 				send "%{SkriptGUI::helpCMD::*}%"
 		else:
