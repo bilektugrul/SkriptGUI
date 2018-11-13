@@ -49,7 +49,8 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::helpCMD::*}
 				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
 					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
-					send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" to (executor if executor is a player, else null)
+					if executor is a player:
+						send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" to executor
 				else:
 					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
 				loop files in directory "plugins/SkriptGUI/GUIs":
