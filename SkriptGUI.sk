@@ -1,4 +1,4 @@
-#Version: 0.5.2
+#Version: 0.5.3
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -50,7 +50,7 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
 					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
 					if executor is a player:
-						send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" to executor
+						send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" and nl to executor
 				else:
 					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
 				loop files in directory "plugins/SkriptGUI/GUIs":
@@ -80,7 +80,9 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 					send "%{SkriptGUI::prefix}% &cPlease enter a GUI name."
 			else if arg-1 is "update":
 				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
-					set file contents of "plugins/SkriptGUI/backups/SkriptGUI (%now%).sk" to file contents of "plugins/Skript/scripts/%script's name%.sk"
+					set {_fileName} to line 1 in file "plugins/Skript/scripts/%script's name%.sk"
+					replace "##Version: " with "" in {_fileName}
+					set file contents of "plugins/SkriptGUI/backups/SkriptGUI (%{_fileName}%).sk" to file contents of "plugins/Skript/scripts/%script's name%.sk"
 					set file contents of "plugins/Skript/scripts/%script's name%.sk" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
 					execute executor command "sk reload %script's name%"
 					send "%{SkriptGUI::prefix}% &2Succesfully updated and reloaded!" and "%{SkriptGUI::prefix}% &2Old version codes have been backed up."
