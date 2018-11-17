@@ -1,11 +1,11 @@
-#Version: 0.5.4
+#Version: 0.5.5
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
 	java.io.InputStreamReader
 	java.net.URL
 	me.clip.placeholderapi.PlaceholderAPI
-expression text get of url %text% [line %-integer%]:
+expression text of url %text% [line %-integer%]:
 	get:
 		set {_in} to new BufferedReader(new InputStreamReader(new URL(expression 1).openStream()))
 		while true:
@@ -18,7 +18,7 @@ expression text get of url %text% [line %-integer%]:
 				return {_return::%{_count}%}
 		{_in}.close()
 		return {_return::*}
-expression placeholder[s] parsed %$strings% [(for|from) %-player%]:
+expression placeholder parsed %$strings% [from %-player%]:
 	return type: string
 	get:
 		loop expressions-1:
@@ -37,8 +37,8 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				set {_systemMS} to current system milliseconds
 				if file "plugins/SkriptGUI/" doesn't exist:
 					create dir "plugins/SkriptGUI/GUIs/" 
-					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml"
-					set file contents of "plugins/SkriptGUI/config.yml" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"	
+					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml"
+					set file contents of "plugins/SkriptGUI/config.yml" to text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"	
 				load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
 				save yaml "SkriptGUI/config" without extra lines between nodes
 				set {SkriptGUI::adminPerm} to yaml value "admin-permission" from "SkriptGUI/config"
@@ -47,7 +47,7 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				set {SkriptGUI::helpCMD::*} to colored join yaml list "help-command" from "SkriptGUI/config" with nl
 				replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::noPermMSG}
 				replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::helpCMD::*}
-				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
+				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
 					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
 					if executor is a player:
 						send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" and nl to executor
@@ -71,7 +71,7 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 					if yaml "SkriptGUI/GUIs/%arg-2%.yml" isn't loaded:
 						set {_systemMS} to current system milliseconds
 						create file "plugins/SkriptGUI/GUIs/%arg-2%.yml" 
-						set file contents of "plugins/SkriptGUI/GUIs/%arg-2%.yml" to join text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
+						set file contents of "plugins/SkriptGUI/GUIs/%arg-2%.yml" to join text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml" with nl
 						load yaml "plugins/SkriptGUI/GUIs/%arg-2%.yml" as "SkriptGUI/GUIs/%arg-2%.yml"
 						send "%{SkriptGUI::prefix}% &2Succesfully created. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)"
 					else:
@@ -79,16 +79,17 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 				else:
 					send "%{SkriptGUI::prefix}% &cPlease enter a GUI name."
 			else if arg-1 is "update":
-				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
+				if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk" line 1:
+					set {_systemMS} to current system milliseconds
 					set {_fileName} to line 1 in file "plugins/Skript/scripts/%script's name%.sk"
 					replace "##Version: " with "" in {_fileName}
 					create directory "plugins/SkriptGUI/backups"
 					set file contents of "plugins/SkriptGUI/backups/SkriptGUI (%{_fileName}%).sk" to file contents of "plugins/Skript/scripts/%script's name%.sk"
-					set file contents of "plugins/Skript/scripts/%script's name%.sk" to text get of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
+					set file contents of "plugins/Skript/scripts/%script's name%.sk" to text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk"
 					execute executor command "sk reload %script's name%"
-					send "%{SkriptGUI::prefix}% &2Succesfully updated and reloaded!" and "%{SkriptGUI::prefix}% &2Old version codes have been backed up."
+					send "%{SkriptGUI::prefix}% &2Succesfully updated and reloaded! &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)" and "%{SkriptGUI::prefix}% &2Old version codes have been backed up."
 				else:
-					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
+					send "%{SkriptGUI::prefix}% &cYou're already running with latest version of SkriptGUI." to executor
 			else:
 				send "%{SkriptGUI::helpCMD::*}%"
 		else:
