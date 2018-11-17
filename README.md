@@ -6,4 +6,5 @@ Required plugins/Skript addons:
 - skript-mirror
 - TuSKe
 - PlaceholderAPI (for placeholders)
+
 I will write a wiki.
