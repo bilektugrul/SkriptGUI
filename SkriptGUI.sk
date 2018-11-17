@@ -1,4 +1,4 @@
-#Version: 0.5.5
+#Version: 0.6
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -30,12 +30,16 @@ on command:
 	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
 		cancel event
 		openGUI(player, yaml value "gui-commands./%full command%" from "SkriptGUI/config")
+on tab complete:
+	if event-string contains "/skgui ":
+		delete completions
+		add "reload", "create", "update" and "open" to completions
 command /skgui [<text>] [<text>] [<player=%player%>]:
 	trigger:
-		if executor has permission {SkriptGUI::adminPerm}:
+		if executor has permission "%{SkriptGUI::adminPerm}%":
 			if arg-1 is "reload" or "rl":
 				set {_systemMS} to current system milliseconds
-				if file "plugins/SkriptGUI/" doesn't exist:
+				if dir "plugins/SkriptGUI/" doesn't exist:
 					create dir "plugins/SkriptGUI/GUIs/" 
 					set file contents of "plugins/SkriptGUI/GUIs/example.yml" to text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/GUIs/example.yml"
 					set file contents of "plugins/SkriptGUI/config.yml" to text of url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI/config.yml"	
@@ -51,6 +55,8 @@ command /skgui [<text>] [<text>] [<player=%player%>]:
 					send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
 					if executor is a player:
 						send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" and nl to executor
+					else:
+						send "%{SkriptGUI::prefix}% &2You can directly update this system in game with command &8""&2/skgui update&8""&2."
 				else:
 					send "%{SkriptGUI::prefix}% &2You're running with latest version of SkriptGUI." and "%{SkriptGUI::prefix}% &2Thanks!" to executor
 				loop files in directory "plugins/SkriptGUI/GUIs":
