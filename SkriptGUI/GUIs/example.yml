@@ -26,6 +26,6 @@ gui:
             - '&6hello &a%player_name%'
             - '&6your health: &a%player_health_rounded%'
             console-commands:
-            - 'broadcast hello guys!'
+            - '!add 1 to balance of "%player_name%" parsed as player'
             player-commands:
             - tell %player_name% there are %server_online% players on this server.
