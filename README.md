@@ -1,4 +1,4 @@
-This Skript a simple GUI Editor with YAML files.
+This Skript is a simple GUI Editor with YAML files.
 Required plugins/Skript addons:
 - SkUtilities
 - SkQuery
