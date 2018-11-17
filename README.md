@@ -8,3 +8,4 @@ Required plugins/Skript addons:
 - PlaceholderAPI (for placeholders)
 
 I will write a wiki.
+You can come my discord server: https://discord.gg/C5gE4N5
