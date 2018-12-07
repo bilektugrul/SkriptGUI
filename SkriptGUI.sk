@@ -1,4 +1,4 @@
-#Version: 0.6
+#Version: 0.7
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -109,12 +109,14 @@ function openGUI(player: player, gui: text):
 			set {_value} to loop-value
 			set {_item} to yaml value "gui.slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml" parsed as item
 			set {_slot} to yaml value "gui.slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
-			set {_playerCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.player-commands" from "SkriptGUI/GUIs/example.yml" from {_player}
-			set {_itemLore::*} to placeholder parsed yaml list "gui.slots.%{_value}%.lore" from "SkriptGUI/GUIs/example.yml" from {_player}
-			set {_itemName} to placeholder parsed yaml value "gui.slots.%{_value}%.item-name" from "SkriptGUI/GUIs/example.yml" from {_player}
-			set {_consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.console-commands" from "SkriptGUI/GUIs/example.yml" from {_player}
+			set {_playerCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+			set {_itemLore::*} to placeholder parsed yaml list "gui.slots.%{_value}%.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+			set {_itemName} to placeholder parsed yaml value "gui.slots.%{_value}%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+			set {_consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 			if {_itemLore::*} is set:
-				make gui slot {_slot} of {_player} with {_item} with no nbt named colored {_itemName} with lore join {_itemLore::*} with "||" to run:
+				loop size of {_itemLore::*} times:
+					set line loop-number of {_item}'s lore to "%{_itemLore::%loop-value-2%}%"
+				make gui slot {_slot} of {_player} with {_item} with no nbt named colored {_itemName} to run:
 					if yaml value "gui.slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 						close {_player}'s inventory
 					loop {_consoleCommands::*}:
