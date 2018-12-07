@@ -111,7 +111,7 @@ function openGUI(player: player, gui: text):
 	if {_player} has permission yaml value "gui.permission" from "SkriptGUI/GUIs/%{_gui}%.yml":
 		set {_size} to yaml value "gui.size" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_name} to yaml value "gui.name" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		open virtual chest inventory with {_size} rows named {_name}	 to {_player}
+		open virtual chest inventory with {_size} rows named {_name} to {_player}
 		loop yaml node keys "gui.slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
 			set {_value} to loop-value
 			set {_item} to yaml value "gui.slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml" parsed as item
