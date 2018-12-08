@@ -1,10 +1,11 @@
 prefix: '&8[&3SkriptGUI&8]'
 admin-permission: skgui.admin
-no-permission-message: '%prefix% &cYou don''t have the required permission for this
-    command.'
+no-permission-message: '%prefix% &cI''m sorry %player_name%, you don''t have the required
+    permission for this command.'
 gui-commands:
     /example: example
 help-command:
-- '%prefix% &c/skgui &ereload'
+- '%prefix% &6Arguments with brackets [<>] is optional.'
+- '%prefix% &c/skgui &ereload [<gui>]'
 - '%prefix% &c/skgui &eopen <gui> [<player>]'
-- '%prefix% &c/skgui &ecreate <gui>'
+- '%prefix% &c/skgui &ecreate <gui-id> <gui-size> <gui-name>'
