@@ -1,14 +1,13 @@
 gui:
     permission: skgui.example
-    no-permission-message: '%prefix% &cYou don''t have the required permission for
-        this GUI.'
+    no-permission-message: '%prefix% &cI''m sorry %player_name%, you don''t have the
+        required permission for this GUI.'
     size: 1
-    name: '&6hi'
+    name: '&6hi %player_name%'
     slots:
-        slot-1:
+        slot-0:
             item: diamond
             slot: 0
-            item-name: '&2hi %player_name%'
             close-on-click: true
             lore:
             - '&6hello &a%player_name%'
@@ -17,7 +16,11 @@ gui:
             - '!add 1 to balance of "%player_name%" parsed as player'
             player-commands:
             - tell %player_name% there are %server_online% players on this server.
-        slot-2:
+            enchants:
+            - FIRE ASPECT 1
+            - SHARPNESS 1
+            shiny: true
+        slot-1:
             item: diamond pickaxe
             slot: 1
             item-name: '&2hi'
@@ -29,3 +32,4 @@ gui:
             - '!add 1 to balance of "%player_name%" parsed as player'
             player-commands:
             - tell %player_name% there are %server_online% players on this server.
+            shiny: true
