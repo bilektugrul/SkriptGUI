@@ -1,4 +1,4 @@
-#Version: v1.0-beta
+#Version: v1.0-beta3
 #Don't change these (^*) lines!
 import:
 	java.io.BufferedReader
@@ -128,6 +128,11 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>]:
 					send "%{SkriptGUI::prefix}% &2Succesfully updated and reloaded! &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)" and "%{SkriptGUI::prefix}% &2Old version codes have been backed up."
 				else:
 					send "%{SkriptGUI::prefix}% &cYou're already running with latest version of SkriptGUI." to executor
+			else if arg-1 is "list":
+				loop loaded yaml:
+					if loop-value contains "SkriptGUI/GUIs/":
+						add last element of (loop-value split at "SkriptGUI/GUIs/") to {_list::*}
+				send {_list::*} to player
 			else:
 				send "%{SkriptGUI::prefix}% &cInvalid argument." 
 				execute player command "skgui help"
@@ -135,7 +140,7 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>]:
 			send placeholder parsed {SkriptGUI::noPermMSG} from player
 function openGUI(player: player, gui: text):
 	if yaml value "gui.open-requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-		set {_openable} to requirementCheck({_gui}, {_player})
+		set {_openable} to requirementCheck("gui.open-requirement.requirements", {_gui}, {_player})
 	else:
 		set {_openable} to true
 	if  {_openable} is true:
@@ -156,16 +161,7 @@ function openGUI(player: player, gui: text):
 		else:
 			forceOpenGUI({_player}, {_gui}, false, 0, {_name})
 	else:
-		set {_denyMessages::*} to placeholder parsed yaml list "gui.open-requirement.deny-messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_denyCommands::player::*} to placeholder parsed yaml list "gui.open-requirement.deny-commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_denyCommands::console::*} to placeholder parsed yaml list "gui.open-requirement.deny-commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		if {_denyMessages::*} is set:
-			replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_denyMessages::*}
-			send colored join {_denyMessages::*} with nl to {_player}
-		loop {_denyCommands::player::*}:
-			execute {_player} command loop-value
-		loop {_denyCommands::console::*}:
-			execute console command loop-value
+		returnDenyEvents("gui.open-requirement", {_gui}, {_player})
 function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer, name: text):
 	if {_virtual} is true:
 		open virtual chest inventory named placeholder parsed colored {_name} from {_player} with size {_size} to {_player}
@@ -174,12 +170,12 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 		set {_GUI::item} to yaml value "gui.slots.%loop-value%.item" from "SkriptGUI/GUIs/%{_gui}%.yml" parsed as item
 		set {_GUI::itemAmount} to yaml value "gui.slots.%loop-value%.amount" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_GUI::slot} to yaml value "gui.slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::rightclick::playerCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.commands.rightclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::rightclick::consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.commands.rightclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.commands.leftclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::playerCommands::*} to placeholder parsed join yaml list "gui.slots.%{_value}%.commands.leftclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::itemLore::*} to placeholder parsed yaml list "gui.slots.%{_value}%.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::itemName} to placeholder parsed yaml value "gui.slots.%{_value}%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::rightclick::playerCommands::*} to placeholder parsed join yaml list "gui.slots.%loop-value%.commands.rightclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::rightclick::consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%loop-value%.commands.rightclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::leftclick::consoleCommands::*} to placeholder parsed join yaml list "gui.slots.%loop-value%.commands.leftclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::leftclick::playerCommands::*} to placeholder parsed join yaml list "gui.slots.%loop-value%.commands.leftclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::itemLore::*} to placeholder parsed yaml list "gui.slots.%loop-value%.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::itemName} to placeholder parsed yaml value "gui.slots.%loop-value%.item-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		if {_GUI::itemLore::*} is set:
 			loop size of {_GUI::itemLore::*} times:
 				set line loop-number of {_GUI::item}'s lore to "%{_GUI::itemLore::%loop-value-2%}%"
@@ -193,38 +189,60 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 			if yaml value "gui.slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				close {_player}'s inventory
 			if gui-click-type is right mouse button:
-				loop {_GUI::rightclick::consoleCommands::*}:
-					execute console command loop-value-2
-				loop {_GUI::rightclick::playerCommands::*}:
-					execute {_player} command loop-value-2
+				if yaml value "gui.slots.%{_value}%.commands.rightclick.requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
+					set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.rightclick.requirement.requirements", {_gui}, {_player})
+				else:
+					set {_clickable} to true
+				if {_clickable} is true:
+					loop {_GUI::rightclick::consoleCommands::*}:
+						execute console command loop-value-2
+					loop {_GUI::rightclick::playerCommands::*}:
+						execute {_player} command loop-value-2
+				else:
+					returnDenyEvents("gui.slots.%{_value}%.commands.rightclick.requirement", {_gui}, {_player})
 			else if gui-click-type is left mouse button:
-				loop {_GUI::leftclick::consoleCommands::*}:
-					execute console command loop-value-2
-				loop {_GUI::leftclick::playerCommands::*}:
-					execute {_player} command loop-value-2
+				if yaml value "gui.slots.%{_value}%.commands.leftclick.requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
+					set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.leftclick.requirement.requirements", {_gui}, {_player})
+				else:
+					set {_clickable} to true
+				if {_clickable} is true:
+					loop {_GUI::leftclick::consoleCommands::*}:
+						execute console command loop-value-2
+					loop {_GUI::leftclick::playerCommands::*}:
+						execute {_player} command loop-value-2
+				else:
+					returnDenyEvents("gui.slots.%{_value}%.commands.rightclick.requirement", {_gui}, {_player})
 		delete {_GUI::*}
-function requirementCheck(gui: text, player: player) :: boolean:
-	loop yaml node keys "gui.open-requirement.requirements" from "SkriptGUI/GUIs/%{_gui}%.yml":	
-		if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "string equals":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+function requirementCheck(value: text, gui: text, player: player) :: boolean:
+	loop yaml node keys {_value} from "SkriptGUI/GUIs/%{_gui}%.yml":
+		set {_output} to placeholder parsed yaml value "%{_value}%.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_input} to placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "string equals ignorecase":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-				if {_output} isn't placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+				if {_output} isn't placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
 					return false
 				else:
 					set {_return} to true
-			else if {_output} is placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+			else if {_output} is placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
 				set {_return} to true
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "string contains":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "string equals":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-				if {_output} doesn't contain placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+				if {_output} doesn't match placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
 					return false
 				else:
 					set {_return} to true
-			else if {_output} contains placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+			else if {_output} matches placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
 				set {_return} to true
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "has permission":
-			set {_permission} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.permission" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "string contains":
+			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
+				if {_output} doesn't contain placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+					return false
+				else:
+					set {_return} to true
+			else if {_output} contains placeholder parsed yaml value "%{_value}%.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}:
+				set {_return} to true
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "has permission":
+			set {_permission} to placeholder parsed yaml value "%{_value}%.%loop-value%.permission" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if {_player} doesn't have permission {_permission}:
 					return false
@@ -232,9 +250,7 @@ function requirementCheck(gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if {_player} has permission {_permission}:
 				set {_return} to true
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is ">":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-			set {_input} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is ">":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if "%{_output}%" parsed as number isn't greater than "%{_input}%" parsed as number:
 					return false
@@ -242,9 +258,7 @@ function requirementCheck(gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if "%{_output}%" parsed as number is greater than "%{_input}%" parsed as number:
 				set {_return} to true
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is ">=":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-			set {_input} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is ">=":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if "%{_output}%" parsed as number isn't greater or equal to "%{_input}%" parsed as number:
 					return false
@@ -252,9 +266,7 @@ function requirementCheck(gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if "%{_output}%" parsed as number is greater or equal to "%{_input}%" parsed as number:
 				set {_return} to true				
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "=":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-			set {_input} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "=":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if "%{_output}%" parsed as number isn't "%{_input}%" parsed as number:
 					return false
@@ -262,9 +274,7 @@ function requirementCheck(gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if "%{_output}%" parsed as number is "%{_input}%" parsed as number:
 				set {_return} to true			
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "<=":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-			set {_input} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "<=":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if "%{_output}%" parsed as number isn't less or equal to "%{_input}%" parsed as number:
 					return false
@@ -272,9 +282,7 @@ function requirementCheck(gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if "%{_output}%" parsed as number is less or equal to "%{_input}%" parsed as number:
 				set {_return} to true		
-		else if yaml value "gui.open-requirement.requirements.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "<":
-			set {_output} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.output" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-			set {_input} to placeholder parsed yaml value "gui.open-requirement.requirements.%loop-value%.input" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		else if yaml value "%{_value}%.%loop-value%.type" from "SkriptGUI/GUIs/%{_gui}%.yml" is "<":
 			if yaml value "gui.open-requirement.stop-if-a-requirement-missing" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 				if "%{_output}%" parsed as number isn't less than "%{_input}%" parsed as number:
 					return false
@@ -283,6 +291,17 @@ function requirementCheck(gui: text, player: player) :: boolean:
 			else if "%{_output}%" parsed as number is less than "%{_input}%" parsed as number:
 				set {_return} to true
 	return {_return}
+function returnDenyEvents(value: text, gui: text, player: player):
+	set {_denyMessages::*} to placeholder parsed yaml list "%{_value}%.deny-messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+	set {_denyCommands::player::*} to placeholder parsed yaml list "%{_value}%.deny-commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+	set {_denyCommands::console::*} to placeholder parsed yaml list "%{_value}%.deny-commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+	if {_denyMessages::*} is set:
+		replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_denyMessages::*}
+		send colored join {_denyMessages::*} with nl to {_player}
+	loop {_denyCommands::player::*}:
+		execute {_player} command loop-value
+	loop {_denyCommands::console::*}:
+		execute console command loop-value
 on inventory close:
 	if {skriptgui::creatingGUI::%player%} is set:
 		if colored name of event-inventory is colored {skriptgui::creatingGUI::%player%::name}:
