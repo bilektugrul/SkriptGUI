@@ -6,9 +6,11 @@ gui-commands:
     /example: example
 help-command:
 - '%prefix% &6Arguments with brackets [<>] is optional.'
-- '%prefix% &c/skgui &ereload [<gui> or <config>]'
-- '%prefix% &c/skgui &edisable <gui>'
-- '%prefix% &c/skgui &eenable <gui>'
-- '%prefix% &c/skgui &eopen <gui> [<player>]'
+- '%prefix% &c/skgui &ereload'
+- '              ● &c/skgui &ereload <gui-id>'
+- '              ● &c/skgui &ereload config'
+- '%prefix% &c/skgui &edisable <gui-id>'
+- '%prefix% &c/skgui &eenable <gui-id>'
+- '%prefix% &c/skgui &eopen <gui-id> [<player>]'
 - '%prefix% &c/skgui &ecreate <gui-id> <gui-size> <gui-name>'
 - '%prefix% &c/skgui &eupdate'
