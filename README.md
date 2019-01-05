@@ -1,3 +1,5 @@
+###SkriptGUI
+
 This Skript is a simple GUI Editor with YAML files.
 Required plugins/Skript addons:
 - SkUtilities
