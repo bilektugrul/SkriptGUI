@@ -1,4 +1,4 @@
-#Version: v1.0-beta4
+#Version: v1.0-beta5
 #Don't change these (^*) lines!
 import:
 	java.lang.System
@@ -200,7 +200,11 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 			set {_GUI::item} to {_GUI::item} with no nbt
 		if {_GUI::itemNBT} is set:
 			set {_GUI::item} to {_GUI::item} with nbt {_GUI::itemNBT}
-		if requirementCheck("gui.slots.%{_value}%.item.view-requirement.requirements", {_gui}, {_player}) is true:
+		if yaml value "gui.slots.%{_value}%.item.view-requirement.requirements" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
+			set {_viewable} to requirementCheck("gui.slots.%{_value}%.item.view-requirement.requirements", {_gui}, {_player})
+		else:
+			set {_viewable} to true
+		if {_viewable} is true:
 			make gui slot {_GUI::slot} of {_player} with ({_GUI::itemAmount} otherwise 1) of {_GUI::item} named colored {_GUI::itemName} with lore {_GUI::itemLore::*} to run:
 				if yaml value "gui.slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 					close {_player}'s inventory
@@ -334,22 +338,21 @@ on inventory close:
 	if {skriptgui::creatingGUI::%player%} is set:
 		if colored name of event-inventory is colored {skriptgui::creatingGUI::%player%::name}:
 			load yaml "plugins/SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" as "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml"
-			set yaml value "gui.permission" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to "skgui.%{skriptgui::creatingGUI::%player%::id}%"
 			set yaml value "gui.size" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::size}
 			set yaml value "gui.name" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::name}
 			set yaml value "gui.update" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to false
 			set yaml value "gui.update-ticks" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to 20
 			loop {skriptgui::creatingGUI::%player%::size} * 9 times:
 				if type of slot (loop-number - 1) of event-inventory isn't air:
-					set yaml value "gui.slots.slot-%loop-number - 1%.item" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to "%type of slot (loop-number - 1) of event-inventory%"
+					set yaml value "gui.slots.slot-%loop-number - 1%.item.material" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to "%type of slot (loop-number - 1) of event-inventory%"
 					set yaml value "gui.slots.slot-%loop-number - 1%.slot" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to rounded (loop-number - 1)
 					if name of slot (loop-number - 1) of event-inventory is set:
-						set yaml value "gui.slots.slot-%loop-number - 1%.item-name" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to name of slot (loop-number - 1) of event-inventory
+						set yaml value "gui.slots.slot-%loop-number - 1%.material-name" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to name of slot (loop-number - 1) of event-inventory
 					set yaml value "gui.slots.slot-%loop-number - 1%.close-on-click" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to true
 					if lore of slot (loop-number - 1) of event-inventory is set:
-						set yaml list "gui.slots.slot-%loop-number - 1%.lore" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to lore of slot (loop-number - 1) of event-inventory
-					set yaml value "gui.slots.slot-%loop-number - 1%.shiny" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to true
-					set yaml value "gui.slots.slot-%loop-number - 1%.hide-flags" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to false
+						set yaml list "gui.slots.slot-%loop-number - 1%.item.lore" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to lore of slot (loop-number - 1) of event-inventory
+					set yaml value "gui.slots.slot-%loop-number - 1%.item.shiny" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to true
+					set yaml value "gui.slots.slot-%loop-number - 1%.item.hide-flags" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to false
 			save yaml "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml"
 			send "%{SkriptGUI::prefix}% &2GUI &e%{skriptgui::creatingGUI::%player%::id}% &2created!"
 			delete {skriptgui::creatingGUI::%player%::*}
