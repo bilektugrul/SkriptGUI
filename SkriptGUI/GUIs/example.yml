@@ -116,3 +116,18 @@ gui:
                     - tell %player_name% player click
                     console-commands:
                     - broadcast console click
+        slot-2:
+            item:
+                material: grass
+                material-name: '&a%player_name%'
+                enchants:
+                - FIRE ASPECT 1
+                - SHARPNESS 1
+                shiny: false
+                hide-flags: true
+                amount: 1
+                lore:
+                - '&6hello &a%player_name%'
+                - '&6free ram: &a%server_ram_free%'
+            slot: 0
+            close-on-click: true
