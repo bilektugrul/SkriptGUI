@@ -14,3 +14,10 @@ help-command:
 - '%prefix% &c/skgui &eopen <gui-id> [<player>]'
 - '%prefix% &c/skgui &ecreate <gui-id> <gui-size> <gui-name>'
 - '%prefix% &c/skgui &eupdate'
+sign-design:
+    required-first-line: SkGUI
+    design:
+    - '%prefix%'
+    - '&a%gui-id%'
+    - '&6Click this sign for'
+    - '&6open gui %gui-id%'
