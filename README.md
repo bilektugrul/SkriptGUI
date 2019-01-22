@@ -1,9 +1,8 @@
-### SkriptGUI
+## SkriptGUI
 
 This Skript is a simple GUI Editor with YAML files.
 Required plugins/Skript addons:
 - SkUtilities
-- SkQuery
 - skript-yaml
 - skript-mirror
 - TuSKe
