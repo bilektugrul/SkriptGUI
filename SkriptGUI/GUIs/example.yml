@@ -18,13 +18,36 @@ gui:
                 input: a
                 output: a
             anything-2:
-                type: string equals
+                type: has permission
+                permission: skgui.open.example
+            anything-3:
+                type: string equals ignorecase
+                input: a
+                output: a
+            anything-4:
+                type: string contains
+                input: a
+                output: a
+            anything-5:
+                type: ''
+                input: '1'
+                output: '0'
+            anything-6:
+                type: '>='
                 input: '1'
                 output: '1'
-            anything-3:
-                type: string equals
-                input: '2'
-                output: '2'
+            anything-7:
+                type: =
+                input: '1'
+                output: '1'
+            anything-8:
+                type: <=
+                input: '1'
+                output: '1'
+            anything-9:
+                type: <=
+                input: '1'
+                output: '1'
     open-commands:
         player:
         - tell %player_name% hello!
@@ -32,14 +55,36 @@ gui:
         - tell %player_name% hello, i'm console!
     slots:
         slot-1:
-            item: allium
-            item-name: '&r%player_name%'
+            item:
+                material: allium
+                material-name: '&a%player_name%'
+                enchants:
+                - FIRE ASPECT 1
+                - SHARPNESS 1
+                shiny: false
+                hide-flags: true
+                amount: 1
+                lore:
+                - '&6hello &a%player_name%'
+                - '&6free ram: &a%server_ram_free%'
+                skull:
+                    owner: heist
+                    id: 0513963d-d5bc-19b7-bbde-f7f0f3502e94
+                    texture-value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGNiNzYxNjZkMWUxZTQ0OTQ1N2I1YzQ0MzZiM2Y0OGI3ZDc2OGFjNjBmMTllMmM2YjI1ZWE0MmM0YmFkN2MifX19
+                view-requirement:
+                    stop-if-a-requirement-missing: true
+                    deny-commands:
+                        player:
+                        - broadcast access denied.
+                        console:
+                        - broadcast access denied by console.
+                    requirements:
+                        anything-1:
+                            type: string equals
+                            input: a
+                            output: bbde-f7f0f3502e94
             slot: 0
-            amount: 1
             close-on-click: true
-            lore:
-            - '&6hello &a%player_name%'
-            - '&6free ram: &a%server_ram_free%'
             commands:
                 rightclick:
                     requirement:
@@ -62,27 +107,12 @@ gui:
                     console-commands:
                     - broadcast console rightclick
                 leftclick:
-                    requirement:
-                        stop-if-a-requirement-missing: true
-                        deny-messages:
-                        - '%prefix% &cI''m sorry but you don''t have the requirement
-                            for this click type.'
-                        deny-commands:
-                            player:
-                            - broadcast access denied.
-                            console:
-                            - broadcast access denied by console.
-                        requirements:
-                            anything-1:
-                                type: string equals
-                                input: a
-                                output: a
                     player-commands:
                     - tell %player_name% player leftclick
                     console-commands:
                     - broadcast console leftclick
-            enchants:
-            - FIRE ASPECT 1
-            - SHARPNESS 1
-            shiny: false
-            hide-flags: true
+                click:
+                    player-commands:
+                    - tell %player_name% player click
+                    console-commands:
+                    - broadcast console click
