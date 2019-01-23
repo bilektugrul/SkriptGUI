@@ -6,6 +6,7 @@ Required plugins/Skript addons:
 - skript-yaml
 - skript-mirror
 - TuSKe
+- MundoSK
 - PlaceholderAPI (for placeholders)
 
 I will write a wiki.
