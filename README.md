@@ -1,6 +1,6 @@
 ## SkriptGUI
 
-This script (see: [Skript](https://github.com/SkriptLang/Skript) is a simple GUI Editor with YAML files.
+This script (see: [Skript])(https://github.com/SkriptLang/Skript) is a simple GUI Editor with YAML files.
 Required plugins/Skript addons:
 - [SkUtilities](https://github.com/tim740/skUtilities/releases)
 - [skript-yaml](https://github.com/Sashie/skript-yaml/releases)
