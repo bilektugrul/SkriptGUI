@@ -56,7 +56,7 @@ gui:
     slots:
         slot-1:
             item:
-                material: allium
+                material: stone
                 material-name: '&a%player_name%'
                 enchants:
                 - FIRE ASPECT 1
@@ -82,7 +82,7 @@ gui:
                         anything-1:
                             type: string equals
                             input: a
-                            output: bbde-f7f0f3502e94
+                            output: a
             slot: 0
             close-on-click: true
             commands:
@@ -129,5 +129,5 @@ gui:
                 lore:
                 - '&6hello &a%player_name%'
                 - '&6free ram: &a%server_ram_free%'
-            slot: 0
+            slot: 1
             close-on-click: true
