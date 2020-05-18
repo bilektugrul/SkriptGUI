@@ -1,4 +1,4 @@
-#Version: v1.0-beta5
+#Version: v1.0-reborn-alpha1
 #Don't change these (^*) lines!
 import:
 	me.clip.placeholderapi.PlaceholderAPI
@@ -26,7 +26,7 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 					if line 1 in file "plugins/Skript/scripts/%script's name%.sk" isn't line 1 from url "https://raw.githubusercontent.com/bilektugrul/SkriptGUI/master/SkriptGUI.sk":
 						send "%{SkriptGUI::prefix}% &cYou're running with outdated version of SkriptGUI." and "%{SkriptGUI::prefix}% &cPlease update from &ehttps://github.com/bilektugrul/SkriptGUI/releases" to executor
 						if executor is a player:
-							send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" and last character of system property line separator to executor
+							send "%{SkriptGUI::prefix}% &2&n<cmd:/skgui update>Click here for directly update system!" and last character of new line to executor
 						else:
 							send "%{SkriptGUI::prefix}% &2You can directly update this system in game with command &8""&2/skgui update&8""&2."
 					else:
@@ -48,7 +48,7 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 					set {SkriptGUI::adminPerm} to yaml value "admin-permission" from "SkriptGUI/config"
 					set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
 					set {SkriptGUI::noPermMSG} to yaml value "no-permission-message" from "SkriptGUI/config"
-					set {SkriptGUI::helpCMD::*} to colored join yaml list "help-command" from "SkriptGUI/config" with last character of system property line separator
+					set {SkriptGUI::helpCMD::*} to colored join yaml list "help-command" from "SkriptGUI/config" with last character of new line
 					replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::noPermMSG}
 					replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::helpCMD::*}
 					send "%{SkriptGUI::prefix}% &eConfig &2succesfully reloaded."
@@ -57,8 +57,8 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 					loop yaml node keys "signDatas" from "SkriptGUI/signData":
 						if block at yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData" is sign:
 							loop 4 times:
-								if element loop-number of yaml list "signDatas.%loop-value-1%.lines" from "SkriptGUI/signData" is set:
-									set {_line::%loop-number%} to element loop-number of yaml list "signDatas.%loop-value-1%.lines" from "SkriptGUI/signData"
+								if (loop-number)st element of yaml list "signDatas.%loop-value-1%.lines" from "SkriptGUI/signData" is set:
+									set {_line::%loop-number%} to (loop-number)st element of yaml list "signDatas.%loop-value-1%.lines" from "SkriptGUI/signData"
 									set line loop-number of (block at yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData") to colored "%{_line::%loop-number%}%"
 								else:
 									set line loop-number of (block at yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData") to ""
@@ -148,7 +148,8 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 				send "%{SkriptGUI::prefix}% &aGUI list:"
 				loop {_list::*}:
 					send formatted " &e> %loop-value% &8(&f%{_list::%loop-index%::size}%&8)"
-					add element 1 of {_list::%loop-index%::size} split at " " parsed as number to {_totalsize}
+					set {_size::*} to {_list::%loop-index%::size} split at " "
+					add {_size::1} parsed as number to {_totalsize}
 				send formatted "%{SkriptGUI::prefix}% &aTotal size of GUIs in disc: &e%{_totalsize}% &fKB"
 			else:
 				send "%{SkriptGUI::prefix}% &cInvalid argument." 
@@ -178,9 +179,9 @@ function openGUI(player: player, gui: text):
 			execute console command loop-value		
 		if {_open-messages::*} is set:
 			replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_open-messages::*}
-			send colored join {_open-messages::*} with last character of system property line separator to {_player}
+			send colored join {_open-messages::*} with last character of new line to {_player}
 		if yaml value "gui.update" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-			while {_player}'s current inventory's name is placeholder parsed {_name} from {_player}:
+			while {_player}.getOpenInventory().getTitle() is placeholder parsed {_name} from {_player}:
 				forceOpenGUI({_player}, {_gui}, false, 0, {_name})
 				wait "%{_update-ticks}% ticks" parsed as timespan
 		else:
@@ -192,40 +193,43 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 		open virtual chest inventory named placeholder parsed colored {_name} from {_player} with size {_size} to {_player}
 	loop yaml node keys "gui.slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
 		set {_value} to loop-value
-		set {_GUI::item} to placeholder parsed yaml value "gui.slots.%loop-value%.item.material" from "SkriptGUI/GUIs/%{_gui}%.yml" parsed as item
-		set {_GUI::itemNBT} to placeholder parsed yaml value "gui.slots.%loop-value%.item.NBT" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::itemAmount} to yaml value "gui.slots.%loop-value%.item.amount" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::slot} to yaml value "gui.slots.%loop-value%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::rightclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.rightclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::rightclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.rightclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.leftclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.leftclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::click::playerCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.click.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::click::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%loop-value%.commands.click.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::itemLore::*} to placeholder parsed yaml list "gui.slots.%loop-value%.item.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::itemName} to placeholder parsed yaml value "gui.slots.%loop-value%.item.material-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::skullOwner} to yaml value "gui.slots.%loop-value%.item.skull.owner" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::skullID} to yaml value "gui.slots.%loop-value%.item.skull.id" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::skullValue} to yaml value "gui.slots.%loop-value%.item.skull.texture-value" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		if {_GUI::skullOwner} is set:
-			set {_GUI::item} to skull of "%{_GUI::skullOwner}%" parsed as offlineplayer
-		if {_GUI::skullID} is set:
-			if {_GUI::skullValue} is set:
-				set {_GUI::item} to skull from skin with value "%{_GUI::skullValue}%" signature "%{_GUI::skullID}%"
-		loop yaml list "gui.slots.%loop-value%.item.enchants" from "SkriptGUI/GUIs/%{_gui}%.yml":
-			enchant {_GUI::item} with "%loop-value-2%" parsed as enchantment type
-		if yaml value "gui.slots.%loop-value%.item.shiny" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-			set {_GUI::item} to shiny {_GUI::item}
-		if yaml value "gui.slots.%loop-value%.item.hide-flags" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
-			set {_GUI::item} to {_GUI::item} with no nbt
+		set {_GUI::item} to enchanted book if placeholder parsed yaml value "gui.slots.%{_value}%.item.material" from "SkriptGUI/GUIs/%{_gui}%.yml" is "enchanted book" otherwise placeholder parsed yaml value "gui.slots.%{_value}%.item.material" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::itemNBT} to placeholder parsed yaml value "gui.slots.%{_value}%.item.NBT" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::itemAmount} to yaml value "gui.slots.%{_value}%.item.amount" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::slot} to yaml value "gui.slots.%{_value}%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::rightclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.rightclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::rightclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.rightclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::leftclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.leftclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::leftclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.leftclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::click::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.click.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::click::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.click.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::itemLore::*} to placeholder parsed yaml list "gui.slots.%{_value}%.item.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::itemName} to placeholder parsed yaml value "gui.slots.%{_value}%.item.material-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_GUI::skullOwner} to yaml value "gui.slots.%{_value}%.item.skull.owner" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::skullID} to yaml value "gui.slots.%{_value}%.item.skull.id" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::skullValue} to yaml value "gui.slots.%{_value}%.item.skull.texture-value" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		if {_GUI::itemNBT} is set:
 			set {_GUI::item} to {_GUI::item} with nbt {_GUI::itemNBT}
+		else:
+			if {_GUI::skullOwner} is set:
+				set {_GUI::item} to skull of "%{_GUI::skullOwner}%" parsed as offlineplayer
+			if {_GUI::skullID} is set:
+				if {_GUI::skullValue} is set:
+					set {_GUI::item} to skull from skin with value "%{_GUI::skullValue}%" signature "%{_GUI::skullID}%"
+			loop yaml list "gui.slots.%loop-value%.item.enchants" from "SkriptGUI/GUIs/%{_gui}%.yml":
+				enchant {_GUI::item} with "%loop-value-2%" parsed as enchantment type
+			if yaml value "gui.slots.%loop-value%.item.shiny" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
+				set {_GUI::item} to shiny {_GUI::item}
+			if yaml value "gui.slots.%loop-value%.item.hide-flags" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
+				set {_GUI::item} to {_GUI::item} with no nbt
+			if {_GUI::itemName} is set:
+				set {_GUI::item} to {_GUI::item} named placeholder parsed colored {_GUI::itemName}
 		if yaml value "gui.slots.%{_value}%.item.view-requirement.requirements" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
 			set {_viewable} to requirementCheck("gui.slots.%{_value}%.item.view-requirement.requirements", {_gui}, {_player})
 		else:
 			set {_viewable} to true
 		if {_viewable} is true:
-			make gui slot {_GUI::slot} of {_player} with ({_GUI::itemAmount} otherwise 1) of "%{_GUI::item}%" parsed as item named colored {_GUI::itemName} with lore {_GUI::itemLore::*} to run:
+			make gui slot {_GUI::slot} of {_player} with ({_GUI::itemAmount} otherwise 1) of {_GUI::item} with lore {_GUI::itemLore::*} to run:
 				if yaml value "gui.slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 					close {_player}'s inventory
 				if gui-click-type is right mouse button:
@@ -358,14 +362,14 @@ function returnDenyEvents(value: text, gui: text, player: player):
 	set {_denyCommands::console::*} to placeholder parsed yaml list "%{_value}%.deny-commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 	if {_denyMessages::*} is set:
 		replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_denyMessages::*}
-		send colored join {_denyMessages::*} with last character of system property line separator to {_player}
+		send colored join {_denyMessages::*} with last character of new line to {_player}
 	loop {_denyCommands::player::*}:
 		execute {_player} command loop-value
 	loop {_denyCommands::console::*}:
 		execute console command loop-value
 on inventory close:
 	if {skriptgui::creatingGUI::%player%} is set:
-		if colored name of event-inventory is colored {skriptgui::creatingGUI::%player%::name}:
+		if player.getOpenInventory().getTitle() is colored {skriptgui::creatingGUI::%player%::name}:
 			load yaml "plugins/SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" as "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml"
 			set yaml value "gui.size" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::size}
 			set yaml value "gui.name" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::name}
