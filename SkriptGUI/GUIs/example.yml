@@ -2,7 +2,7 @@ gui:
     size: 1
     name: '&6hi %player_name%'
     update: true
-    update-ticks: 50
+    update-ticks: 60
     open-requirement:
         stop-if-a-requirement-missing: true
         deny-messages:
@@ -31,7 +31,7 @@ gui:
             anything-5:
                 type: ''
                 input: '1'
-                output: '0'
+                output: '1'
             anything-6:
                 type: '>='
                 input: '1'
@@ -53,6 +53,17 @@ gui:
         - tell %player_name% hello!
         console:
         - tell %player_name% hello, i'm console!
+    open-messages:
+        - congratulations %player_name%!
+        - you have opened example gui!
+    close-messages:
+        - congratulations %player_name%!
+        - you have closed example gui!
+    close-commands:
+        player:
+        - tell %player_name% hello! you closed example gui
+        console:
+        - tell %player_name% hello, i'm console! you closed example gui
     slots:
         slot-1:
             item:
@@ -80,13 +91,13 @@ gui:
                         - broadcast access denied by console.
                     requirements:
                         anything-1:
-                            type: string equals
-                            input: a
-                            output: a
+                            type: ">="
+                            input: "5"
+                            output: "%vault_eco_balance%"
             slot: 0
             close-on-click: true
             commands:
-                rightclick:
+                right mouse button:
                     requirement:
                         stop-if-a-requirement-missing: true
                         deny-messages:
@@ -106,11 +117,21 @@ gui:
                     - tell %player_name% player rightclick
                     console-commands:
                     - broadcast console rightclick
-                leftclick:
+                left mouse button:
                     player-commands:
                     - tell %player_name% player leftclick
                     console-commands:
-                    - broadcast console leftclick
+                    - broadcast console leftclick 
+                left mouse button with shift:
+                    player-commands:
+                    - tell %player_name% player leftclick shift
+                    console-commands:
+                    - broadcast console leftclick shift
+                right mouse button with shift:
+                    player-commands:
+                    - tell %player_name% shift right
+                    console-commands:
+                    - say hello %player_name% shift right
                 click:
                     player-commands:
                     - tell %player_name% player click
@@ -118,13 +139,13 @@ gui:
                     - broadcast console click
         slot-2:
             item:
-                material: grass
+                material: enchanted book
                 material-name: '&a%player_name%'
                 enchants:
                 - FIRE ASPECT 1
                 - SHARPNESS 1
                 shiny: false
-                hide-flags: true
+                hide-flags: false
                 amount: 1
                 lore:
                 - '&6hello &a%player_name%'

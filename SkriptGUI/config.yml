@@ -4,20 +4,18 @@ no-permission-message: '%prefix% &cI''m sorry %player_name%, you don''t have the
     permission for this command.'
 gui-commands:
     /example: example
+join-gui: example
+first-join-gui: example
 help-command:
 - '%prefix% &6Arguments with brackets [<>] is optional.'
 - '%prefix% &c/skgui &ereload'
 - '              ● &c/skgui &ereload <gui-id>'
 - '              ● &c/skgui &ereload config'
+- '              ● &c/skgui &ereload signs'
+- '%prefix% &c/skgui &esign <create> <gui-id> &8- &aMakes targeted sign open GUI <gui-id>'
 - '%prefix% &c/skgui &edisable <gui-id>'
 - '%prefix% &c/skgui &eenable <gui-id>'
 - '%prefix% &c/skgui &eopen <gui-id> [<player>]'
-- '%prefix% &c/skgui &ecreate <gui-id> <gui-size> <gui-name>'
+- '%prefix% &c/skgui &ecreate <gui-id> <gui-size> <gui-name> [<save-nbt>]'
 - '%prefix% &c/skgui &eupdate'
-sign-design:
-    required-first-line: SkGUI
-    design:
-    - '%prefix%'
-    - '&a%gui-id%'
-    - '&6Click this sign for'
-    - '&6open gui %gui-id%'
+- '%prefix% &c/skgui &elist'

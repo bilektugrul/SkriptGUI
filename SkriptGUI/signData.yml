@@ -1,0 +1,15 @@
+signDatas:
+    '1':
+        location: !location
+            world: world
+            x: 532.5
+            y: 71.5
+            z: -89.5
+            yaw: 0.0
+            pitch: 0.0
+        GUI: example
+        lines:
+        - hey, you can edit
+        - sign lines
+        - from signData file
+        - SKGUI
