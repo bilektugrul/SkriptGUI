@@ -1,12 +1,15 @@
-#Version: v1.0-reborn-alpha1
+#Version: v1.0-reborn-alpha2
 #Don't change these (^*) lines!
 import:
 	me.clip.placeholderapi.PlaceholderAPI
+	java.nio.file.Path
+	java.nio.file.Files
+	java.nio.file.Paths
 expression placeholder parsed %$strings% [from %-player%]:
 	return type: string
 	get:
 		loop expressions-1:
-			add PlaceholderAPI.setPlaceholders(expression-2, loop-value) to {_return::*}
+			add PlaceholderAPI.setPlaceholders(expression-2 and loop-value) to {_return::*}
 		return {_return::*}
 command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 	trigger:
@@ -41,9 +44,11 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 								unload yaml loop-value
 					send "%{SkriptGUI::prefix}% &2Succesfully reloaded with &e%{_guiAmount}% &2GUI. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)" to executor
 				else if yaml "SkriptGUI/GUIs/%arg-2%.yml" is loaded:
+					set {_systemMS} to current system milliseconds				
 					load yaml "plugins/SkriptGUI/GUIs/%arg-2%.yml" as "SkriptGUI/GUIs/%arg-2%.yml"
-					send "%{SkriptGUI::prefix}% &2GUI &e%arg-2% &2is succesfully reloaded." to executor
+					send "%{SkriptGUI::prefix}% &2GUI &e%arg-2% &2is succesfully reloaded. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)" to executor
 				else if arg-2 is "config":
+					set {_systemMS} to current system milliseconds	
 					load yaml "plugins/SkriptGUI/config.yml" as "SkriptGUI/config"
 					set {SkriptGUI::adminPerm} to yaml value "admin-permission" from "SkriptGUI/config"
 					set {SkriptGUI::prefix} to yaml value "prefix" from "SkriptGUI/config"
@@ -51,8 +56,9 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 					set {SkriptGUI::helpCMD::*} to colored join yaml list "help-command" from "SkriptGUI/config" with last character of new line
 					replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::noPermMSG}
 					replace "%%prefix%%" with {SkriptGUI::prefix} in {SkriptGUI::helpCMD::*}
-					send "%{SkriptGUI::prefix}% &eConfig &2succesfully reloaded."
+					send "%{SkriptGUI::prefix}% &eConfig &2succesfully reloaded. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)"
 				else if arg-2 is "signs":
+					set {_systemMS} to current system milliseconds	
 					load yaml "plugins/SkriptGUI/signData.yml" as "SkriptGUI/signData"
 					loop yaml node keys "signDatas" from "SkriptGUI/signData":
 						if block at yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData" is sign:
@@ -64,8 +70,7 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 									set line loop-number of (block at yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData") to ""
 						else:
 							delete yaml value "signDatas.%loop-value-1%.location" from "SkriptGUI/signData" 
-					save yaml "SkriptGUI/signData" without extra lines between nodes
-					send "%{SkriptGUI::prefix}% &eSigns &2succesfully reloaded."
+					send "%{SkriptGUI::prefix}% &eSigns &2succesfully reloaded. &8(&e%difference between {_systemMS} and current system milliseconds% ms&8)"
 				else:
 					send "%{SkriptGUI::prefix}% &cThere is no GUI with this ID."
 			else if arg-1 is "disable":
@@ -104,7 +109,7 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 								set {SkriptGUI::creatingGUI::%player%} to true
 								set {SkriptGUI::creatingGUI::%player%::id} to arg-2
 								set {SkriptGUI::creatingGUI::%player%::size} to arg-3 parsed as integer
-								set {SkriptGUI::creatingGUI::%player%::name} to placeholder parsed arg-4 from player
+								set {SkriptGUI::creatingGUI::%player%::name} to arg-4
 								send "%{SkriptGUI::prefix}% &2Edit the GUI however you want. After that, close it. The system will take care of the rest."
 								open virtual chest inventory named placeholder parsed colored arg-4 from player with size arg-3 parsed as integer to player
 							else:
@@ -130,13 +135,16 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 			else if arg-1 is "sign":
 				if arg-2 is "create":
 					if yaml "SkriptGUI/GUIs/%arg-3%.yml" is loaded:
-						set {_size} to size of yaml node keys "signDatas" from "SkriptGUI/signData"
-						set yaml value "signDatas.%{_size} + 1%.location" from "SkriptGUI/signData" to targeted block's location
-						set yaml value "signDatas.%{_size} + 1%.GUI" from "SkriptGUI/signData" to arg-3
-						loop 4 times:
-							add line loop-number of targeted block to yaml list "signDatas.%{_size} + 1%.lines" from "SkriptGUI/signData"
-						send "%{SkriptGUI::prefix}% &2You succesfully created a GUI sign."
-						save yaml "SkriptGUI/signData" without extra lines between nodes
+						if targeted block is sign:
+							set {_size} to size of yaml node keys "signDatas" from "SkriptGUI/signData"
+							set yaml value "signDatas.%{_size} + 1%.location" from "SkriptGUI/signData" to targeted block's location
+							set yaml value "signDatas.%{_size} + 1%.GUI" from "SkriptGUI/signData" to arg-3
+							loop 4 times:
+								add line loop-number of targeted block to yaml list "signDatas.%{_size} + 1%.lines" from "SkriptGUI/signData"
+							send "%{SkriptGUI::prefix}% &2You succesfully created a GUI sign."
+							save yaml "SkriptGUI/signData" without extra lines between nodes
+						else:
+							send "%{SkriptGUI::prefix}% &cYou are not looking at a sign."
 					else:
 						send "%{SkriptGUI::prefix}% &cThere is no GUI with this ID."
 			else if arg-1 is "list":
@@ -144,13 +152,12 @@ command /skgui [<text="help">] [<text>] [<text>] [<text>] [<text>]:
 					if loop-value contains "SkriptGUI/GUIs/":
 						set {_name} to last element of (loop-value split at "SkriptGUI/GUIs/") 
 						set {_list::%{_name}%} to {_name}
-						set {_list::%{_name}%::size} to size of file "plugins/SkriptGUI/GUIs/%{_name}%"
+						set {_list::%{_name}%::size} to Files.size(Paths.get("plugins/SkriptGUI/GUIs/%{_name}%"))
 				send "%{SkriptGUI::prefix}% &aGUI list:"
 				loop {_list::*}:
-					send formatted " &e> %loop-value% &8(&f%{_list::%loop-index%::size}%&8)"
-					set {_size::*} to {_list::%loop-index%::size} split at " "
-					add {_size::1} parsed as number to {_totalsize}
-				send formatted "%{SkriptGUI::prefix}% &aTotal size of GUIs in disc: &e%{_totalsize}% &fKB"
+					send formatted " &e> %loop-value% &8(&f%{_list::%loop-index%::size}/1000% &eKB&8) "
+					add "%{_list::%loop-index%::size}%" parsed as number to {_totalsize}
+				send formatted "%{SkriptGUI::prefix}% &aTotal size of GUIs in disc: &e%{_totalsize}/1000% &fKB"
 			else:
 				send "%{SkriptGUI::prefix}% &cInvalid argument." 
 				execute executor command "skgui help"
@@ -161,25 +168,22 @@ function openGUI(player: player, gui: text):
 		if yaml list "gui.world-check.enabled-worlds" from "SkriptGUI/GUIs/%{_gui}%.yml" doesn't contain "%{_player}'s world%":
 			returnDenyEvents("gui.world-check", {_gui}, {_player})
 			stop
-	if yaml value "gui.open-requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-		set {_openable} to requirementCheck("gui.open-requirement.requirements", {_gui}, {_player})
-	else:
-		set {_openable} to true
+	set {_openable} to requirementCheck("gui.open-requirement.requirements", {_gui}, {_player})
 	if  {_openable} is true:
 		set {_size} to yaml value "gui.size" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_name} to yaml value "gui.name" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_update-ticks} to yaml value "gui.update-ticks" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_open-commands::player::*} to placeholder parsed yaml list "gui.open.commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_open-commands::console::*} to placeholder parsed yaml list "gui.open.commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_open-messages::*} to placeholder parsed yaml list "gui.open.messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		open virtual chest inventory named placeholder parsed colored {_name} from {_player} with size {_size} to {_player}
+		set metadata value "GUI" of {_player} to {_gui}
+		set {_open-commands::player::*} to placeholder parsed yaml list "gui.open-commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_open-commands::console::*} to placeholder parsed yaml list "gui.open-commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		set {_open-messages::*} to placeholder parsed yaml list "gui.open-messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		loop {_open-commands::player::*}:
 			execute {_player} command loop-value
 		loop {_open-commands::console::*}:
-			execute console command loop-value		
-		if {_open-messages::*} is set:
-			replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_open-messages::*}
-			send colored join {_open-messages::*} with last character of new line to {_player}
+			execute console command loop-value
+		replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_open-messages::*}
+		send colored join {_open-messages::*} with last character of new line to {_player}
 		if yaml value "gui.update" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 			while {_player}.getOpenInventory().getTitle() is placeholder parsed {_name} from {_player}:
 				forceOpenGUI({_player}, {_gui}, false, 0, {_name})
@@ -194,15 +198,13 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 	loop yaml node keys "gui.slots" from "SkriptGUI/GUIs/%{_gui}%.yml":
 		set {_value} to loop-value
 		set {_GUI::item} to enchanted book if placeholder parsed yaml value "gui.slots.%{_value}%.item.material" from "SkriptGUI/GUIs/%{_gui}%.yml" is "enchanted book" otherwise placeholder parsed yaml value "gui.slots.%{_value}%.item.material" from "SkriptGUI/GUIs/%{_gui}%.yml"
+		set {_GUI::item} to "%{_GUI::item}%" parsed as material
 		set {_GUI::itemNBT} to placeholder parsed yaml value "gui.slots.%{_value}%.item.NBT" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		set {_GUI::itemAmount} to yaml value "gui.slots.%{_value}%.item.amount" from "SkriptGUI/GUIs/%{_gui}%.yml"
 		set {_GUI::slot} to yaml value "gui.slots.%{_value}%.slot" from "SkriptGUI/GUIs/%{_gui}%.yml"
-		set {_GUI::rightclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.rightclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::rightclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.rightclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.leftclick.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::leftclick::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.leftclick.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::click::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.click.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
-		set {_GUI::click::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.click.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+		loop {SkriptGUI::guiClickTypes::*} and "click":	
+			set {_GUI::%loop-value-2.toString()%::playerCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.%loop-value-2%.player-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
+			set {_GUI::%loop-value-2.toString()%::consoleCommands::*} to placeholder parsed yaml list "gui.slots.%{_value}%.commands.%loop-value-2%.console-commands" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		set {_GUI::itemLore::*} to placeholder parsed yaml list "gui.slots.%{_value}%.item.lore" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		set {_GUI::itemName} to placeholder parsed yaml value "gui.slots.%{_value}%.item.material-name" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 		set {_GUI::skullOwner} to yaml value "gui.slots.%{_value}%.item.skull.owner" from "SkriptGUI/GUIs/%{_gui}%.yml"
@@ -224,43 +226,24 @@ function forceOpenGUI(player: player, gui: text, virtual: boolean, size: integer
 				set {_GUI::item} to {_GUI::item} with no nbt
 			if {_GUI::itemName} is set:
 				set {_GUI::item} to {_GUI::item} named placeholder parsed colored {_GUI::itemName}
-		if yaml value "gui.slots.%{_value}%.item.view-requirement.requirements" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-			set {_viewable} to requirementCheck("gui.slots.%{_value}%.item.view-requirement.requirements", {_gui}, {_player})
-		else:
-			set {_viewable} to true
+		set {_viewable} to requirementCheck("gui.slots.%{_value}%.item.view-requirement.requirements", {_gui}, {_player})
 		if {_viewable} is true:
 			make gui slot {_GUI::slot} of {_player} with ({_GUI::itemAmount} otherwise 1) of {_GUI::item} with lore {_GUI::itemLore::*} to run:
+				
+				set {_clickType} to "%gui-click-type%"
 				if yaml value "gui.slots.%{_value}%.close-on-click" from "SkriptGUI/GUIs/%{_gui}%.yml" is true:
 					close {_player}'s inventory
-				if gui-click-type is right mouse button:
-					if yaml value "gui.slots.%{_value}%.commands.rightclick.requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-						set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.rightclick.requirement.requirements", {_gui}, {_player})
-					else:
-						set {_clickable} to true
+				if {_GUI::%{_clickType}%::playerCommands::*} or {_GUI::%{_clickType}%::consoleCommands::*} are set:
+					set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.%{_clickType}%.requirement.requirements", {_gui}, {_player})
 					if {_clickable} is true:
-						loop {_GUI::rightclick::consoleCommands::*}:
+						loop {_GUI::%{_clickType}%::consoleCommands::*}:
 							execute console command loop-value-2
-						loop {_GUI::rightclick::playerCommands::*}:
-							execute {_player} command loop-value-2
-					else:
-						returnDenyEvents("gui.slots.%{_value}%.commands.rightclick.requirement", {_gui}, {_player})
-				else if gui-click-type is left mouse button:
-					if yaml value "gui.slots.%{_value}%.commands.leftclick.requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-						set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.leftclick.requirement.requirements", {_gui}, {_player})
-					else:
-						set {_clickable} to true
-					if {_clickable} is true:
-						loop {_GUI::leftclick::consoleCommands::*}:
-							execute console command loop-value-2
-						loop {_GUI::leftclick::playerCommands::*}:
+						loop {_GUI::%{_clickType}%::playerCommands::*}:
 							execute {_player} command loop-value-2
 					else:
 						returnDenyEvents("gui.slots.%{_value}%.commands.rightclick.requirement", {_gui}, {_player})
 				if yaml value "gui.slots.%{_value}%.commands.click" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-					if yaml value "gui.slots.%{_value}%.commands.click.requirement" from "SkriptGUI/GUIs/%{_gui}%.yml" is set:
-						set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.click.requirement.requirements", {_gui}, {_player})
-					else:
-						set {_clickable} to true
+					set {_clickable} to requirementCheck("gui.slots.%{_value}%.commands.click.requirement.requirements", {_gui}, {_player})
 					if {_clickable} is true:
 						loop {_GUI::click::consoleCommands::*}:
 							execute console command loop-value-2
@@ -355,7 +338,7 @@ function requirementCheck(value: text, gui: text, player: player) :: boolean:
 					set {_return} to true
 			else if "%{_output}%" parsed as number is less than "%{_input}%" parsed as number:
 				set {_return} to true
-	return {_return}
+	return {_return} otherwise true
 function returnDenyEvents(value: text, gui: text, player: player):
 	set {_denyMessages::*} to placeholder parsed yaml list "%{_value}%.deny-messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
 	set {_denyCommands::player::*} to placeholder parsed yaml list "%{_value}%.deny-commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from {_player}
@@ -369,7 +352,7 @@ function returnDenyEvents(value: text, gui: text, player: player):
 		execute console command loop-value
 on inventory close:
 	if {skriptgui::creatingGUI::%player%} is set:
-		if player.getOpenInventory().getTitle() is colored {skriptgui::creatingGUI::%player%::name}:
+		if placeholder parsed colored "%player.getOpenInventory().getTitle()%" is placeholder parsed colored {skriptgui::creatingGUI::%player%::name} from player:
 			load yaml "plugins/SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" as "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml"
 			set yaml value "gui.size" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::size}
 			set yaml value "gui.name" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to {skriptgui::creatingGUI::%player%::name}
@@ -391,8 +374,28 @@ on inventory close:
 						set yaml value "gui.slots.slot-%loop-number -1%.item.NBT" from "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml" to nbt of slot (loop-number -1) of event-inventory
 			save yaml "SkriptGUI/GUIs/%{skriptgui::creatingGUI::%player%::id}%.yml"
 			send "%{SkriptGUI::prefix}% &2GUI &e%{SkriptGUI::creatingGUI::%player%::id}% &2created!"
-			delete {SkriptGUI::creatingGUI::%player%::*}
-			delete {SkriptGUI::creatingGUI::%player%}
+			delete {SkriptGUI::creatingGUI::%player%::*} and {SkriptGUI::creatingGUI::%player%}
+	if metadata value "GUI" of player is set:
+		set {_gui} to metadata value "GUI" of player
+		set {_close-commands::player::*} to placeholder parsed yaml list "gui.close-commands.player" from "SkriptGUI/GUIs/%{_gui}%.yml" from player
+		set {_close-commands::console::*} to placeholder parsed yaml list "gui.close-commands.console" from "SkriptGUI/GUIs/%{_gui}%.yml" from player
+		set {_close-messages::*} to placeholder parsed yaml list "gui.close-messages" from "SkriptGUI/GUIs/%{_gui}%.yml" from player
+		loop {_close-commands::player::*}:
+			execute player command loop-value
+		loop {_close-commands::console::*}:
+			execute console command loop-value
+		replace "%%prefix%%" with "%{skriptgui::prefix}%" in {_close-messages::*}
+		send colored join {_close-messages::*} with last character of new line to player
+		delete metadata value "GUI" of player
+on join:
+	wait 5 tick
+	delete metadata value "GUI" of player
+	if yaml value "join-gui" from "SkriptGUI/config" is set:
+		openGUI(player, yaml value "join-gui" from "SkriptGUI/config")
+first join:
+	wait 5 tick
+	if yaml value "first-join-gui" from "SkriptGUI/config" is set:
+		openGUI(player, yaml value "join-gui" from "SkriptGUI/config")
 on command:
 	if yaml value "gui-commands./%full command%" from "SkriptGUI/config" is set:
 		cancel event
@@ -416,3 +419,6 @@ on break of sign:
 				stop
 on load:
 	execute console command "skgui reload"
+	set {SkriptGUI::guiClickTypes::*} to ...(click type.getUsage()) split at ", "
+on skript load:
+	delete {SkriptGUI::creatingGUI::*}
